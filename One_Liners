@@ -1,0 +1,85 @@
+# IPConfig /all 
+Get-NetIPConfiguration 
+
+# Network Adapter Names 
+Get-NetAdapter 
+Get-NetAdapterStatistics 
+
+# Configure IP addresses 
+New-NetIPAddress -InterfaceAlias Ethernet -IPAddress 172.16.0.20 -PrefixLength 24 -DefaultGateway 172.16.0.1 
+
+# Configure the DNS server 
+Set-DNSClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 172.16.0.10 
+
+# Ping/Tracert/Telnet to a port Test-NetConnection 
+Test-NetConnection 8.8.8.8 
+Test-NetConnection www.bing.com –Traceroute 
+Test-NetConnection www.bing.com –Port 80 Test-NetConnection smtp.com –Port 25 
+
+# Restart service 
+Restart-Service 
+
+# View all services 
+Get-Service | Out-GridView 
+
+# Stop, start, and configure service 
+Stop-Service 
+Start-Service 
+Set-Service 
+
+# Rename computer 
+Rename-Computer AU-TechEDDemo 
+
+# Restart computer 
+Restart-Computer 
+
+# Shutdown computer 
+Shutdown-Computer 
+
+# Join domain 
+Add-Computer -DomainName adatum.internal 
+
+# Add roles and features 
+Install-WindowsFeature -IncludeAllSubfeature -IncludeManagementTools File-Services 
+
+# .Net framework Install-WindowsFeature Net-Framework-Core -source d:\sources\sxs 
+
+# Fix computer’s trust relationship 
+test-computersecurechannel -credential domain\admin -Repair 
+
+# Add a firewall rule New-NetFirewallRule -DisplayName “Allow Inbound Port 80" -Direction Inbound –LocalPort 80 -Protocol TCP -Action Allow New-NetFirewallRule -DisplayName "Block Outbound Port 80" -Direction Outbound –LocalPort 80 -Protocol TCP -Action Block 
+
+# Create a VM 
+New-VM -MemoryStartupBytes 2048MB -Name SYD-VM -Path "d:\SYD-VM" -VHDPath  "d:\SYD-VM\prep-disk.vhdx" 
+
+# Assign VM network 
+GET-VM –name SYD* | GET-VMNetworkAdapter | Connect-VMNetworkAdapter –Switchname 'Private Network' 
+
+# Checkpoint VMs 
+Get-VM | CheckPoint-VM 
+
+# Password Reset 
+$newpwd = ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText –Force Set-ADAccountPassword Optimus -NewPassword $newpwd –Reset Set-ADAccountPassword Optimus -NewPassword $newpwd -Reset -PassThru | Set-ADuser -ChangePasswordAtLogon $True 
+
+# Locate FSMO Roles Get-ADForest adatum.com | FT SchemaMaster Get-ADForest adatum.com | FT DomainNamingMaster Get-ADDomain adatum.com | FT PDCEmulator Get-ADDomain adatum.com | FT InfrastructureMaster Get-ADDomain adatum.com | FT RIDMaster 
+
+# Seize FSMO Roles 
+Move-ADDirectoryServerOperationMasterRole -Identity NEW-DC -OperationMasterRole RIDMaster,InfrastructureMaster,DomainNamingMaster -Force 
+
+# Enable Remote Desktop 
+set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0 Enable-NetFirewallRule -DisplayGroup "Remote Desktop" 
+
+#Check Updates 
+Get-HotFix 
+
+# Date and Timezone 
+Set-date "12/12/2014 10:30 PM“ (Get-WmiObject win32_timezone).caption TZUTIL /s “AUS Eastern Standard Time" 
+
+# Find accounts with Password Never Expires 
+Search-ADAccount –PasswordNeverExpires | out-gridview 
+
+# Inactive Accounts 
+Search-AdAccount –accountinactive –timespan 90.00:00:00 | out-gridview 
+
+# Locked Out and Disabled accounts 
+Search-AdAccount –Lockedout | out-gridview Search-AdAccount –AccountDisabled | out-gridview​
